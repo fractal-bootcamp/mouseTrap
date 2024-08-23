@@ -38,7 +38,7 @@ function createCircle() {
   circle.style.borderRadius = "50%";
   circle.style.backgroundColor = "transparent";
   circle.style.border = "2px solid red";
-  circle.style.zIndex = "9999";
+  circle.style.zIndex = "10000";
   updateCirclePosition();
   document.body.appendChild(circle);
 }
@@ -47,13 +47,13 @@ function createBrownOverlay() {
   console.log("BROWN_OVERLAY_CREATE");
   const overlay = document.createElement("div");
   overlay.id = "brownOverlay";
-  overlay.style.position = "absolute";
+  overlay.style.position = "fixed";
   overlay.style.top = "0";
   overlay.style.left = "0";
   overlay.style.width = "100%";
   overlay.style.height = "100%";
   overlay.style.backgroundColor = "brown";
-  overlay.style.zIndex = "9998";
+  overlay.style.zIndex = "9999";
   document.body.appendChild(overlay);
 }
 
@@ -66,9 +66,18 @@ function updateClipPath() {
   const overlay = document.getElementById("brownOverlay");
   if (overlay) {
     const radius = 25; // Half of the circle's width/height
-    const clipPath = `circle(${radius}px at ${posX + radius}px ${
-      posY + radius
-    }px)`;
+    const clipPath = `polygon(
+      0 0,
+      100% 0,
+      100% 100%,
+      0 100%,
+      0 0,
+      ${posX}px ${posY}px,
+      ${posX}px ${posY + 2 * radius}px,
+      ${posX + 2 * radius}px ${posY + 2 * radius}px,
+      ${posX + 2 * radius}px ${posY}px,
+      ${posX}px ${posY}px
+    )`;
     overlay.style.clipPath = clipPath;
   }
 }
