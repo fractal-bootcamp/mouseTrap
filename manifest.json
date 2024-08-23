@@ -1,18 +1,23 @@
 {
   "manifest_version": 3,
-  "name": "Hello World with Circle",
+  "name": "MouseTrap",
   "version": "1.0",
   "description": "A simple Chrome extension that displays a controllable circle",
   "action": {
     "default_popup": "popup.html"
   },
   "permissions": [
-    "activeTab"
+    "activeTab",
+    "webNavigation"
   ],
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["content.js"]
+      "js": ["content.js"],
+      "run_at": "document_start"
     }
-  ]
+  ],
+  "background": {
+    "service_worker": "background.js"
+  }
 }
