@@ -7,7 +7,10 @@ function initializeExtension() {
   chrome.runtime.sendMessage({ action: "getExtensionState" }, (response) => {
     isExtensionActive = response.isActive;
     if (isExtensionActive) {
+      removeAllJavaScript();
+      createBrownOverlay();
       createCircle();
+      updateClipPath();
       applyAllModifications();
       observer.observe(document.body, observerConfig);
     }
@@ -16,24 +19,42 @@ function initializeExtension() {
 
 function reinitializeExtension() {
   if (isExtensionActive) {
+    removeAllJavaScript();
+    createBrownOverlay();
     createCircle();
+    updateClipPath();
     applyAllModifications();
     observer.observe(document.body, observerConfig);
   }
 }
-
 initializeExtension();
 
 function createCircle() {
+  console.log("CIRCLE_CREATE");
   circle = document.createElement("div");
-  circle.style.position = "fixed";
+  circle.style.position = "absolute";
   circle.style.width = "50px";
   circle.style.height = "50px";
   circle.style.borderRadius = "50%";
-  circle.style.backgroundColor = "red";
+  circle.style.backgroundColor = "transparent";
+  circle.style.border = "2px solid red";
   circle.style.zIndex = "9999";
   updateCirclePosition();
   document.body.appendChild(circle);
+}
+
+function createBrownOverlay() {
+  console.log("BROWN_OVERLAY_CREATE");
+  const overlay = document.createElement("div");
+  overlay.id = "brownOverlay";
+  overlay.style.position = "absolute";
+  overlay.style.top = "0";
+  overlay.style.left = "0";
+  overlay.style.width = "100%";
+  overlay.style.height = "100%";
+  overlay.style.backgroundColor = "brown";
+  overlay.style.zIndex = "9998";
+  document.body.appendChild(overlay);
 }
 
 function updateCirclePosition() {
@@ -41,10 +62,22 @@ function updateCirclePosition() {
   circle.style.top = posY + "px";
 }
 
+function updateClipPath() {
+  const overlay = document.getElementById("brownOverlay");
+  if (overlay) {
+    const radius = 25; // Half of the circle's width/height
+    const clipPath = `circle(${radius}px at ${posX + radius}px ${
+      posY + radius
+    }px)`;
+    overlay.style.clipPath = clipPath;
+  }
+}
+
 function moveCircle(dx, dy) {
   posX += dx;
   posY += dy;
   updateCirclePosition();
+  updateClipPath();
 }
 
 function changeButtonColors() {
@@ -89,7 +122,15 @@ function replaceMediaWithEmptyDivs() {
   });
 }
 
+function removeAllJavaScript() {
+  const scripts = document.getElementsByTagName("script");
+  while (scripts.length > 0) {
+    scripts[0].parentNode.removeChild(scripts[0]);
+  }
+}
+
 function applyAllModifications() {
+  removeAllJavaScript();
   changeButtonColors();
   changeTextToWingdings();
   replaceMediaWithEmptyDivs();
@@ -128,7 +169,11 @@ const observer = new MutationObserver((mutations) => {
       if (mutation.type === "childList") {
         mutation.addedNodes.forEach((node) => {
           if (node.nodeType === Node.ELEMENT_NODE) {
-            replaceMediaWithEmptyDivs();
+            if (node.tagName === "SCRIPT") {
+              node.parentNode.removeChild(node);
+            } else {
+              replaceMediaWithEmptyDivs();
+            }
           }
         });
       }
@@ -146,6 +191,8 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   if (request.action === "initializeCircle") {
     isExtensionActive = true;
     chrome.runtime.sendMessage({ action: "setExtensionState", isActive: true });
+    removeAllJavaScript();
+    createBrownOverlay();
     createCircle();
     applyAllModifications();
     observer.observe(document.body, observerConfig);
