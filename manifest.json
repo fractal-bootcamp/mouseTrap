@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "MouseTrap",
   "version": "1.0",
-  "description": "A simple Chrome extension that displays a controllable circle",
+  "description": "A simple Chrome extension that displays a controllable clip path",
   "action": {
     "default_popup": "popup.html"
   },

@@ -1,3 +1,3 @@
 chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-  chrome.tabs.sendMessage(tabs[0].id, { action: "initializeCircle" });
+  chrome.tabs.sendMessage(tabs[0].id, { action: "initializeClipPath" });
 });
