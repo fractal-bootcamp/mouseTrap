@@ -1,4 +1,3 @@
-let circle;
 let posX = 0;
 let posY = 0;
 let isExtensionActive = false;
@@ -9,7 +8,6 @@ function initializeExtension() {
     if (isExtensionActive) {
       removeAllJavaScript();
       createBrownOverlay();
-      createCircle();
       updateClipPath();
       applyAllModifications();
       observer.observe(document.body, observerConfig);
@@ -21,27 +19,13 @@ function reinitializeExtension() {
   if (isExtensionActive) {
     removeAllJavaScript();
     createBrownOverlay();
-    createCircle();
     updateClipPath();
     applyAllModifications();
     observer.observe(document.body, observerConfig);
   }
 }
-initializeExtension();
 
-function createCircle() {
-  console.log("CIRCLE_CREATE");
-  circle = document.createElement("div");
-  circle.style.position = "absolute";
-  circle.style.width = "50px";
-  circle.style.height = "50px";
-  circle.style.borderRadius = "50%";
-  circle.style.backgroundColor = "transparent";
-  circle.style.border = "2px solid red";
-  circle.style.zIndex = "10000";
-  updateCirclePosition();
-  document.body.appendChild(circle);
-}
+initializeExtension();
 
 function createBrownOverlay() {
   console.log("BROWN_OVERLAY_CREATE");
@@ -57,15 +41,10 @@ function createBrownOverlay() {
   document.body.appendChild(overlay);
 }
 
-function updateCirclePosition() {
-  circle.style.left = posX + "px";
-  circle.style.top = posY + "px";
-}
-
 function updateClipPath() {
   const overlay = document.getElementById("brownOverlay");
   if (overlay) {
-    const radius = 25; // Half of the circle's width/height
+    const size = 50; // Size of the visible area
     const clipPath = `polygon(
       0 0,
       100% 0,
@@ -73,19 +52,18 @@ function updateClipPath() {
       0 100%,
       0 0,
       ${posX}px ${posY}px,
-      ${posX}px ${posY + 2 * radius}px,
-      ${posX + 2 * radius}px ${posY + 2 * radius}px,
-      ${posX + 2 * radius}px ${posY}px,
+      ${posX}px ${posY + size}px,
+      ${posX + size}px ${posY + size}px,
+      ${posX + size}px ${posY}px,
       ${posX}px ${posY}px
     )`;
     overlay.style.clipPath = clipPath;
   }
 }
 
-function moveCircle(dx, dy) {
+function moveClipPath(dx, dy) {
   posX += dx;
   posY += dy;
-  updateCirclePosition();
   updateClipPath();
 }
 
@@ -155,16 +133,16 @@ document.addEventListener(
       const step = 10;
       switch (event.key) {
         case "w":
-          moveCircle(0, -step);
+          moveClipPath(0, -step);
           break;
         case "s":
-          moveCircle(0, step);
+          moveClipPath(0, step);
           break;
         case "a":
-          moveCircle(-step, 0);
+          moveClipPath(-step, 0);
           break;
         case "d":
-          moveCircle(step, 0);
+          moveClipPath(step, 0);
           break;
       }
     }
@@ -197,12 +175,12 @@ const observerConfig = {
 };
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-  if (request.action === "initializeCircle") {
+  if (request.action === "initializeClipPath") {
     isExtensionActive = true;
     chrome.runtime.sendMessage({ action: "setExtensionState", isActive: true });
     removeAllJavaScript();
     createBrownOverlay();
-    createCircle();
+    updateClipPath();
     applyAllModifications();
     observer.observe(document.body, observerConfig);
   } else if (request.action === "reinitializeExtension") {
